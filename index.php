@@ -1,62 +1,69 @@
 <?php
-$servername = "localhost";
+$serverName = "localhost";
 $username = "root";
 $password = "";
+$dbName = "databank_php";
 
 try {
-  $conn = new PDO("mysql:host=$servername;dbname=databank_php", $username, $password);
-  // set the PDO error mode to exception
-  $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-  echo "";
-} catch(PDOException $e) {
-  echo "Connection failed: " . $e->getMessage();
-}
+	$conn = new PDO("mysql:host=$serverName;dbname=$dbName", $username, $password);
+	$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
 
-
-$stmt  = $conn->query('SELECT * FROM onderwerpen');
+  } catch(PDOException $e) {
+	echo "Error: " . $e->getMessage();
+  }
+  $stmt  = $conn->query('SELECT * FROM characters ');
+  // ORDER BY name ASC
+  $characters_array = $stmt->fetchall(PDO::FETCH_ASSOC);
 
 ?>
 
-
-
-<!doctype html>
-
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>J2F1BELP5L2 - Content uit je database</title>
-  <link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <title>All Characters</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <link href="style/style.css" rel="stylesheet">
 </head>
 <body>
 
-	<?php include 'includes/header.php'; 
+<header><?php if(!isset($_GET['character_info']) || $_GET['character_info'] == null){ ?><h1>Alle <?php echo count($characters_array) ?> uit de database</h1>
+    <?php } else { 
+        if(isset($characters_array[$_GET['character_info']])){ 
+            $char_item = $characters_array[$_GET['character_info']]; 
+            echo $char_item['name']; 
+            ?> <a class="item" href="?character_info=">
+            <div class="BackButton"><i class="fas fa-arrow-left"></i> terug</div>
+        </a><?php 
+        } else { 
+            echo "Character not found"; 
+        } 
+    }?>
+</header>
+<main>
 
-		//  Haal hier uit de URL welke pagina uit het menu is opgevraagd. Gebruik deze om de content uit de database te halen. 
-		$array = $stmt->fetchall(PDO::FETCH_ASSOC);
+<?php
 
-		if (!empty($_GET)) {
-			$content = $_GET['content'];
-			foreach ($array as $item){
-				if($item['id'] == $content) {
-					$subject = $item;
-				}
-			}
-			echo $subject['name'] . "<br>";
-			?>
+if(!isset($_GET['character_info']) || $_GET['character_info'] == null){
+    
+    $x = -1;
+    foreach ($characters_array as $char_item){
+      $x++;
 
-			<p> <?php echo $subject['description']; ?> </p>
-			<?php
-			echo '<img src="' . $subject['image'] . '" alt="img">';
-		  }
-		//  Laat hier de content die je op hebt gehaald uit de database zien op de pagina.
-			
-			
-	
+      include('character_info.php');
+    }
+  } else {
+    $char_item = $characters_array[$_GET['character_info']];
+    include('character.php');
+  }
+  function char_info(){
+    
+  }
+?>
+</main>
 
 
-	include 'includes/footer.php'; ?>
-
-
+<footer>&copy; Jelle Bol 2023</footer>
 </body>
 </html>
